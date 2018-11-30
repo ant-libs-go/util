@@ -6,14 +6,19 @@
 ####################################################################### */
 
 /**
- * import blogs "github.com/astaxie/beego/logs"
- * blogs.SetLogger(blogs.AdapterMultiFile, beego.AppConfig.String("log::format"))
+ * import (
+ * 	"os"
+ * 	"github.com/cihub/seelog"
+ * )
+ * logger, err := seelog.LoggerFromConfigAsFile("log.xml")
+ * if  err != nil {
+ *     os.Exit(-1)
+ * }
+ * seelog.ReplaceLogger(logger)
+ * defer seelog.Flush()
  *
- * go func(){
- *    logs.New(&logs.Entry{Prefix: "[g:__GID__]"})
- *    defer logs.Close()
- *    logs.Error("test error: %s", "error")
- * }()
+ * log := logs.New()
+ * log.Infof("this is a %s", "log")
  */
 
 package logs
@@ -21,76 +26,80 @@ package logs
 import (
 	"fmt"
 	"strconv"
-	"strings"
+	"sync"
 
 	"github.com/ant-libs-go/util"
-	"github.com/astaxie/beego/logs"
+	"github.com/cihub/seelog"
 )
 
-type Entry struct {
-	Prefix string
+var (
+	lock    sync.RWMutex
+	entries map[int]*SessLog
+)
+
+type SessLog struct {
+	Sessid string
+	Logger seelog.LoggerInterface
 }
 
-var entries map[int]*Entry
-
 func init() {
-	entries = make(map[int]*Entry)
+	entries = make(map[int]*SessLog)
 }
 
 /**
  * 必须调用Close方法
  */
-func New(entry *Entry) {
-	gid := util.Goid()
-	entry.Prefix = strings.Replace(entry.Prefix, "__GID__", strconv.Itoa(gid), -1)
-	entries[gid] = entry
-}
-
-func Close() {
-	gid := util.Goid()
-	delete(entries, gid)
-}
-
-func getPrefix() string {
-	if entry, ok := entries[util.Goid()]; ok {
-		return fmt.Sprintf("%s ", entry.Prefix)
+func New(sessid string) {
+	if len(sessid) == 0 {
+		sessid := strconv.Itoa(util.Goid())
 	}
-	return ""
+	o := &SessLog{}
+	o.Sessid = sessid
+	o.Logger = seelog.Current
+	lock.Lock()
+	entries[sessid] = o
+	lock.Unlock()
+	return o
 }
 
-func Emergency(f string, v ...interface{}) {
-	logs.Emergency(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func Get(sessid string) *SessLog {
+	lock.RLock()
+	defer lock.RUnlock()
+	if v, ok := entries[sessid]; ok {
+		return v
+	}
+	return nil
 }
 
-func Alert(f string, v ...interface{}) {
-	logs.Alert(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func Close(sessid string) {
+	if len(sessid) == 0 {
+		sessid := strconv.Itoa(util.Goid())
+	}
+	lock.Lock()
+	delete(entries, sessid)
+	lock.Unlock()
 }
 
-func Critical(f string, v ...interface{}) {
-	logs.Critical(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Tracef(f string, v ...interface{}) {
+	this.Logger.Tracef(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }
 
-func Error(f string, v ...interface{}) {
-	fmt.Println(len(entries))
-	logs.Error(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Debugf(f string, v ...interface{}) {
+	this.Logger.Debugf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }
 
-func Warn(f string, v ...interface{}) {
-	logs.Warn(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Infof(f string, v ...interface{}) {
+	this.Logger.Infof(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }
 
-func Notice(f string, v ...interface{}) {
-	logs.Notice(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Warnf(f string, v ...interface{}) {
+	this.Logger.Warnf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }
 
-func Info(f string, v ...interface{}) {
-	logs.Info(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Errorf(f string, v ...interface{}) {
+	this.Logger.Errorf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }
 
-func Debug(f string, v ...interface{}) {
-	logs.Debug(fmt.Sprintf("%s%s", getPrefix(), f), v...)
-}
-
-func Trace(f string, v ...interface{}) {
-	logs.Trace(fmt.Sprintf("%s%s", getPrefix(), f), v...)
+func (this *SessLog) Criticalf(f string, v ...interface{}) {
+	this.Logger.Criticalf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
 }

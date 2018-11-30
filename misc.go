@@ -1,7 +1,7 @@
 /* ######################################################################
 # Author: (zfly1207@126.com)
 # Created Time: 2018-06-06 07:20:06
-# File Name: func.go
+# File Name: misc.go
 # Description:
 ####################################################################### */
 
@@ -10,13 +10,12 @@ package util
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/gob"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/rand"
 	"reflect"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -105,47 +104,39 @@ func IsChanged(origin, target interface{}, excludes ...string) bool {
 	return false
 }
 
-// camel string, xx_yy to XxYy
-func CamelString(s string) string {
-	data := make([]byte, 0, len(s))
-	j := false
-	k := false
-	num := len(s) - 1
-	for i := 0; i <= num; i++ {
-		d := s[i]
-		if k == false && d >= 'A' && d <= 'Z' {
-			k = true
-		}
-		if d >= 'a' && d <= 'z' && (j || k == false) {
-			d = d - 32
-			j = false
-			k = true
-		}
-		if k && d == '_' && num > i && s[i+1] >= 'a' && s[i+1] <= 'z' {
-			j = true
-			continue
-		}
-		data = append(data, d)
-	}
-	return string(data[:])
+func EncodeId(id int64) (r string) {
+	r = base64.StdEncoding.EncodeToString([]byte(strconv.FormatInt(id+33554432, 32)))
+	return
 }
 
-// snake string, XxYy to xx_yy, XxYY to xx_yy
-func SnakeString(s string) string {
-	data := make([]byte, 0, len(s)*2)
-	j := false
-	num := len(s)
-	for i := 0; i < num; i++ {
-		d := s[i]
-		if i > 0 && d >= 'A' && d <= 'Z' && j {
-			data = append(data, '_')
-		}
-		if d != '_' {
-			j = true
-		}
-		data = append(data, d)
+func DecodeId(id string) (r int64, err error) {
+	bs, err := base64.StdEncoding.DecodeString(id)
+	if err != nil {
+		err = fmt.Errorf("%s base64Decode, %s", id, err)
+		return
 	}
-	return strings.ToLower(string(data[:]))
+	r, err = strconv.ParseInt(string(bs), 32, 64)
+	if err != nil {
+		err = fmt.Errorf("%s parse, %s", id, err)
+		return
+	}
+	// 32 to 10, - 32768
+	r -= 33554432
+	return
+}
+
+func DateRange(s, e string) (r []string) {
+	st, _ := time.Parse("20060102", s)
+	et, _ := strconv.Atoi(e)
+	for {
+		t, _ := strconv.Atoi(st.Format("20060102"))
+		if t > et {
+			break
+		}
+		r = append(r, strconv.Itoa(t))
+		st = st.AddDate(0, 0, +1)
+	}
+	return
 }
 
 func DeepCopy(dst, src interface{}) error {
@@ -156,24 +147,7 @@ func DeepCopy(dst, src interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(dst)
 }
 
-// regexp.Compile(`\[(?P<node>[\d_]+)\]$`)
-// return {"node":val}
-func FindStringSubmatch(re *regexp.Regexp, s string) (r map[string]string, err error) {
-	r = make(map[string]string)
-	match := re.FindStringSubmatch(s)
-	if match == nil {
-		return nil, errors.New("no match")
-	}
-	for i, name := range re.SubexpNames() {
-		if i == 0 || name == "" {
-			continue
-		}
-		r[name] = match[i]
-	}
-	return
-}
-
-func GenGoroutineId(salt string) string {
+func GenRandomId(salt string) string {
 	salt = salt + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	h := md5.New()
