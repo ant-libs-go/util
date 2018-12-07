@@ -185,3 +185,18 @@ func Goid() int {
 	}
 	return id
 }
+
+func Serialize(inp interface{}) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	err := enc.Encode(inp)
+	if err == nil {
+		return buf.Bytes(), nil
+	}
+	return nil, err
+}
+
+func Deserialize(d []byte, inp interface{}) error {
+	dec := gob.NewDecoder(bytes.NewBuffer(d))
+	return dec.Decode(inp)
+}
