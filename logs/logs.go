@@ -51,7 +51,7 @@ func init() {
  */
 func New(sessid string) {
 	if len(sessid) == 0 {
-		sessid := strconv.Itoa(util.Goid())
+		sessid = strconv.Itoa(util.Goid())
 	}
 	o := &SessLog{}
 	o.Sessid = sessid
@@ -73,7 +73,7 @@ func Get(sessid string) *SessLog {
 
 func Close(sessid string) {
 	if len(sessid) == 0 {
-		sessid := strconv.Itoa(util.Goid())
+		sessid = strconv.Itoa(util.Goid())
 	}
 	lock.Lock()
 	delete(entries, sessid)
