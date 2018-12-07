@@ -34,7 +34,7 @@ import (
 
 var (
 	lock    sync.RWMutex
-	entries map[int]*SessLog
+	entries map[string]*SessLog
 )
 
 type SessLog struct {
@@ -43,7 +43,7 @@ type SessLog struct {
 }
 
 func init() {
-	entries = make(map[int]*SessLog)
+	entries = make(map[string]*SessLog)
 }
 
 /**
