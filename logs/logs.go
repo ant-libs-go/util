@@ -49,7 +49,7 @@ func init() {
 /**
  * 必须调用Close方法
  */
-func New(sessid string) {
+func New(sessid string) *SessLog {
 	if len(sessid) == 0 {
 		sessid = strconv.Itoa(util.Goid())
 	}
