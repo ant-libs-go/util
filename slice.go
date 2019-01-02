@@ -65,7 +65,7 @@ func SliceUnique(slice interface{}) (r []interface{}) {
 	return
 }
 
-func SliceColumn(slice interface{}, col string) (r []interface{}) {
+func SliceColumn(slice interface{}, col string) (r interface{}) {
 	if reflect.TypeOf(slice).Kind() != reflect.Slice {
 		return
 	}
@@ -75,7 +75,23 @@ func SliceColumn(slice interface{}, col string) (r []interface{}) {
 		if f.IsValid() != true {
 			continue
 		}
-		r = append(r, f.Interface())
+		switch f.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+			if r == nil {
+				r = []int32{}
+			}
+			r = append(r.([]int32), int32(f.Int()))
+		case reflect.Int64:
+			if r == nil {
+				r = []int64{}
+			}
+			r = append(r.([]int64), f.Int())
+		case reflect.String:
+			if r == nil {
+				r = []string{}
+			}
+			r = append(r.([]string), f.String())
+		}
 	}
 	return
 }
