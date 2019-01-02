@@ -64,3 +64,18 @@ func SliceUnique(slice interface{}) (r []interface{}) {
 	}
 	return
 }
+
+func SliceColumn(slice interface{}, col string) (r []interface{}) {
+	if reflect.TypeOf(slice).Kind() != reflect.Slice {
+		return
+	}
+	s := reflect.ValueOf(slice)
+	for i := 0; i < s.Len(); i++ {
+		f := s.Index(i).Elem().FieldByName(col)
+		if f.IsValid() != true {
+			continue
+		}
+		r = append(r, f.Interface())
+	}
+	return
+}
