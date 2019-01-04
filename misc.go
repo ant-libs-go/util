@@ -33,9 +33,9 @@ func Assign(origin, target interface{}, excludes ...string) {
 	val_target := reflect.ValueOf(target).Elem()
 
 	for i := 0; i < val_origin.NumField(); i++ {
-		if !val_target.FieldByName(val_origin.Type().Field(i).Name).IsValid() {
-			continue
-		}
+		//if !val_target.FieldByName(val_origin.Type().Field(i).Name).IsValid() {
+		//  continue
+		//}
 		is_exclude := false
 		for _, col := range excludes {
 			if val_origin.Type().Field(i).Name == col {
@@ -51,6 +51,10 @@ func Assign(origin, target interface{}, excludes ...string) {
 			val_target.FieldByName(val_origin.Type().Field(i).Name).SetInt(val_origin.Field(i).Int())
 		case reflect.String:
 			val_target.FieldByName(val_origin.Type().Field(i).Name).SetString(val_origin.Field(i).String())
+		case reflect.Struct:
+			Assign(val_origin.Field(i).Addr().Interface(), target)
+		case reflect.Ptr:
+			Assign(val_origin.Field(i).Interface(), target)
 		}
 	}
 }
