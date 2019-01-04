@@ -56,9 +56,9 @@ func Assign(origin, target interface{}, excludes ...string) {
 			}
 			val_target.FieldByName(val_origin.Type().Field(i).Name).SetString(val_origin.Field(i).String())
 		case reflect.Struct:
-			Assign(val_origin.Field(i).Addr().Interface(), target)
+			Assign(val_origin.Field(i).Addr().Interface(), target, excludes...)
 		case reflect.Ptr:
-			Assign(val_origin.Field(i).Interface(), target)
+			Assign(val_origin.Field(i).Interface(), target, excludes...)
 		}
 	}
 }
