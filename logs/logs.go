@@ -68,7 +68,7 @@ func Get(sessid string) *SessLog {
 	if v, ok := entries[sessid]; ok {
 		return v
 	}
-	return nil
+	return New(sessid)
 }
 
 func Close(sessid string) {
