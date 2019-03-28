@@ -79,14 +79,15 @@ func (this *SessLog) Close() {
 func registerCleaner() {
 	go func() {
 		for {
-			fmt.Println("len:", len(entries))
 			ts := time.Now().Unix()
+			lock.RLock()
 			for _, entry := range entries {
 				if ts-entry.last < 120 { // timeout for 2 minute
 					continue
 				}
 				entry.Close()
 			}
+			lock.RUnlock()
 			time.Sleep(10 * time.Second) // interval 10 second
 		}
 	}()
