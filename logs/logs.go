@@ -17,7 +17,7 @@
  * seelog.ReplaceLogger(logger)
  * defer seelog.Flush()
  *
- * log := logs.New()
+ * log := logs.New(uuid)
  * log.Infof("this is a %s", "log")
  */
 
