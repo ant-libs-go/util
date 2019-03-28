@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/ant-libs-go/util"
 	"github.com/cihub/seelog"
@@ -38,68 +39,84 @@ var (
 )
 
 type SessLog struct {
-	Sessid string
-	Logger seelog.LoggerInterface
+	sessid string
+	last   int64
+	logger seelog.LoggerInterface
 }
 
 func init() {
 	entries = make(map[string]*SessLog)
+	registerCleaner()
 }
 
-/**
- * 必须调用Close方法
- */
-func New(sessid string) *SessLog {
+func New(sessid string) (r *SessLog) {
 	if len(sessid) == 0 {
 		sessid = strconv.Itoa(util.Goid())
 	}
-	o := &SessLog{}
-	o.Sessid = sessid
-	o.Logger = seelog.Current
-	lock.Lock()
-	entries[sessid] = o
-	lock.Unlock()
-	return o
-}
-
-func Get(sessid string) *SessLog {
 	lock.RLock()
-	defer lock.RUnlock()
-	if v, ok := entries[sessid]; ok {
-		return v
+	r, ok := entries[sessid]
+	lock.RUnlock()
+	if !ok {
+		r = build(sessid)
 	}
-	return New(sessid)
+	return
 }
 
-func Close(sessid string) {
-	if len(sessid) == 0 {
-		sessid = strconv.Itoa(util.Goid())
-	}
+func build(sessid string) *SessLog {
+	o := &SessLog{sessid: sessid, logger: seelog.Current}
 	lock.Lock()
-	delete(entries, sessid)
+	defer lock.Unlock()
+	entries[sessid] = o
+	return o.use()
+}
+
+func (this *SessLog) Close() {
+	lock.Lock()
+	delete(entries, this.sessid)
 	lock.Unlock()
+}
+
+func registerCleaner() {
+	go func() {
+		for {
+			fmt.Println("len:", len(entries))
+			ts := time.Now().Unix()
+			for _, entry := range entries {
+				if ts-entry.last < 120 { // timeout for 2 minute
+					continue
+				}
+				entry.Close()
+			}
+			time.Sleep(10 * time.Second) // interval 10 second
+		}
+	}()
+}
+
+func (this *SessLog) use() *SessLog {
+	this.last = time.Now().Unix()
+	return this
 }
 
 func (this *SessLog) Tracef(f string, v ...interface{}) {
-	this.Logger.Tracef(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Tracef(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
-	this.Logger.Debugf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Debugf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
-	this.Logger.Infof(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Infof(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
-	this.Logger.Warnf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Warnf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
-	this.Logger.Errorf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Errorf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
-	this.Logger.Criticalf(fmt.Sprintf("[sid:%s] %s", this.Sessid, f), v...)
+	this.use().logger.Criticalf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
 }
