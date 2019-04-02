@@ -46,7 +46,7 @@ type SessLog struct {
 
 func init() {
 	entries = make(map[string]*SessLog)
-	registerCleaner()
+	registerReleaser()
 }
 
 func New(sessid string) (r *SessLog) {
@@ -65,29 +65,34 @@ func New(sessid string) (r *SessLog) {
 func build(sessid string) *SessLog {
 	o := &SessLog{sessid: sessid, logger: seelog.Current}
 	lock.Lock()
-	defer lock.Unlock()
 	entries[sessid] = o
+	lock.Unlock()
 	return o.use()
 }
 
-func (this *SessLog) Close() {
+func (this *SessLog) Release() {
 	lock.Lock()
-	delete(entries, this.sessid)
+	this.release()
 	lock.Unlock()
 }
 
-func registerCleaner() {
+// unsafe
+func (this *SessLog) release() {
+	delete(entries, this.sessid)
+}
+
+func registerReleaser() {
 	go func() {
 		for {
 			ts := time.Now().Unix()
-			lock.RLock()
+			lock.Lock()
 			for _, entry := range entries {
 				if ts-entry.last < 120 { // timeout for 2 minute
 					continue
 				}
-				entry.Close()
+				entry.release()
 			}
-			lock.RUnlock()
+			lock.Unlock()
 			time.Sleep(10 * time.Second) // interval 10 second
 		}
 	}()
