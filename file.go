@@ -16,9 +16,18 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
+
+// 返回绝对路径
+func Abs(path string, basePath string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
+	return path.Join(basePath, path)
+}
 
 func PathExists(path string) (exists bool, isdir bool, err error) {
 	f, err := os.Stat(path)
