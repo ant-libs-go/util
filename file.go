@@ -22,7 +22,7 @@ import (
 )
 
 // 返回绝对路径
-func Abs(path string, basePath string) string {
+func AbsPath(path string, basePath string) string {
 	if filepath.IsAbs(path) {
 		return path
 	}
