@@ -22,11 +22,11 @@ import (
 )
 
 // 返回绝对路径
-func AbsPath(path string, basePath string) string {
-	if filepath.IsAbs(path) {
-		return path
+func AbsPath(targetPath string, basePath string) string {
+	if filepath.IsAbs(targetPath) {
+		return targetPath
 	}
-	return path.Join(basePath, path)
+	return path.Join(basePath, targetPath)
 }
 
 func PathExists(path string) (exists bool, isdir bool, err error) {
