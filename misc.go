@@ -9,10 +9,8 @@ package util
 
 import (
 	"bytes"
-	"crypto/md5"
 	"encoding/base64"
 	"encoding/gob"
-	"encoding/hex"
 	"fmt"
 	"math/rand"
 	"reflect"
@@ -156,11 +154,7 @@ func DeepCopy(dst, src interface{}) error {
 }
 
 func GenRandomId(salt string) string {
-	salt = salt + strconv.FormatInt(time.Now().UnixNano(), 10)
-
-	h := md5.New()
-	h.Write([]byte(salt))
-	return hex.EncodeToString(h.Sum(nil))
+	return StringMd5(salt + strconv.FormatInt(time.Now().UnixNano(), 10))
 }
 
 func GetRandomString(length int) string {
