@@ -154,7 +154,7 @@ func DeepCopy(dst, src interface{}) error {
 }
 
 func GenRandomId(salt string) string {
-	return StringMd5(salt + strconv.FormatInt(time.Now().UnixNano(), 10))
+	return Md5String(salt + strconv.FormatInt(time.Now().UnixNano(), 10))
 }
 
 func GetRandomString(length int) string {
