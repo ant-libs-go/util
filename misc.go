@@ -26,14 +26,22 @@ import (
  * @param: target
  * @params: excludes ... the attribute name exclude assign
  */
-func Assign(origin, target interface{}, excludes ...string) {
+func Assign(origin, target interface{}, excludes ...string) (err error) {
+	var curFieldName string
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("assign %s: %s", curFieldName, e)
+		}
+	}()
+
 	val_origin := reflect.ValueOf(origin).Elem()
 	val_target := reflect.ValueOf(target).Elem()
 
 	for i := 0; i < val_origin.NumField(); i++ {
+		curFieldName = val_origin.Type().Field(i).Name
 		is_exclude := false
 		for _, col := range excludes {
-			if val_origin.Type().Field(i).Name == col {
+			if curFieldName == col {
 				is_exclude = true
 				break
 			}
@@ -41,24 +49,25 @@ func Assign(origin, target interface{}, excludes ...string) {
 		if is_exclude {
 			continue
 		}
-		is_valid := val_target.FieldByName(val_origin.Type().Field(i).Name).IsValid()
+		is_valid := val_target.FieldByName(curFieldName).IsValid()
 		switch val_origin.Field(i).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			if !is_valid {
 				continue
 			}
-			val_target.FieldByName(val_origin.Type().Field(i).Name).SetInt(val_origin.Field(i).Int())
+			val_target.FieldByName(curFieldName).SetInt(val_origin.Field(i).Int())
 		case reflect.String:
 			if !is_valid {
 				continue
 			}
-			val_target.FieldByName(val_origin.Type().Field(i).Name).SetString(val_origin.Field(i).String())
+			val_target.FieldByName(curFieldName).SetString(val_origin.Field(i).String())
 		case reflect.Struct:
 			Assign(val_origin.Field(i).Addr().Interface(), target, excludes...)
 		case reflect.Ptr:
 			Assign(val_origin.Field(i).Interface(), target, excludes...)
 		}
 	}
+	return
 }
 
 /**
