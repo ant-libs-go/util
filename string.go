@@ -9,20 +9,23 @@ package util
 
 import (
 	"crypto/md5"
+	"crypto/sha1"
 	"encoding/hex"
 	"errors"
+	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 // camel string, xx_yy to XxYy
-func CamelString(s string) string {
-	data := make([]byte, 0, len(s))
+func CamelString(inp string) string {
+	data := make([]byte, 0, len(inp))
 	j := false
 	k := false
-	num := len(s) - 1
+	num := len(inp) - 1
 	for i := 0; i <= num; i++ {
-		d := s[i]
+		d := inp[i]
 		if k == false && d >= 'A' && d <= 'Z' {
 			k = true
 		}
@@ -31,7 +34,7 @@ func CamelString(s string) string {
 			j = false
 			k = true
 		}
-		if k && d == '_' && num > i && s[i+1] >= 'a' && s[i+1] <= 'z' {
+		if k && d == '_' && num > i && inp[i+1] >= 'a' && inp[i+1] <= 'z' {
 			j = true
 			continue
 		}
@@ -41,12 +44,12 @@ func CamelString(s string) string {
 }
 
 // snake string, XxYy to xx_yy, XxYY to xx_yy
-func SnakeString(s string) string {
-	data := make([]byte, 0, len(s)*2)
+func SnakeString(inp string) string {
+	data := make([]byte, 0, len(inp)*2)
 	j := false
-	num := len(s)
+	num := len(inp)
 	for i := 0; i < num; i++ {
-		d := s[i]
+		d := inp[i]
 		if i > 0 && d >= 'A' && d <= 'Z' && j {
 			data = append(data, '_')
 		}
@@ -60,9 +63,9 @@ func SnakeString(s string) string {
 
 // regexp.Compile(`\[(?P<node>[\d_]+)\]$`)
 // return {"node":val}
-func FindStringSubmatch(re *regexp.Regexp, s string) (r map[string]string, err error) {
+func FindStringSubmatch(re *regexp.Regexp, inp string) (r map[string]string, err error) {
 	r = make(map[string]string)
-	match := re.FindStringSubmatch(s)
+	match := re.FindStringSubmatch(inp)
 	if match == nil {
 		return nil, errors.New("no match")
 	}
@@ -75,8 +78,76 @@ func FindStringSubmatch(re *regexp.Regexp, s string) (r map[string]string, err e
 	return
 }
 
-func Md5String(in string) string {
+func Md5String(inp string) string {
 	h := md5.New()
-	h.Write([]byte(in))
+	h.Write([]byte(inp))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func Sha1String(inp string) string {
+	sha1Ctx := sha1.New()
+	sha1Ctx.Write([]byte(inp))
+	return hex.EncodeToString(sha1Ctx.Sum(nil))
+}
+
+func StrToInt64(inp string, defaultValue int64) int64 {
+	val, err := strconv.ParseInt(inp, 10, 64)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+func Int64ToStr(inp int64) string {
+	return strconv.FormatInt(inp, 10)
+}
+
+func StrToInt32(inp string, defaultValue int32) int32 {
+	return int32(StrToInt64(inp, int64(defaultValue)))
+}
+
+func Int32ToStr(inp int32) string {
+	return Int64ToStr(int64(inp))
+}
+
+func StrToInt(inp string, defaultValue int) int {
+	return int(StrToInt64(inp, int64(defaultValue)))
+}
+
+func IntToStr(inp int) string {
+	return Int64ToStr(int64(inp))
+}
+
+func UrlEncode(inp string) string {
+	return url.QueryEscape(inp)
+}
+
+func UrlDecode(inp string) string {
+	r, err := url.QueryUnescape(inp)
+	if err != nil {
+		return ""
+	}
+	return r
+}
+
+func Max(x, y int64) int64 {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+func Min(x, y int64) int64 {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+func MinInt(x, y int) int {
+	if x < y {
+		return x
+	}
+
+	return y
 }
