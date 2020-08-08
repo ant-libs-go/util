@@ -9,7 +9,6 @@ package util
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/gob"
 	"fmt"
 	"math/rand"
@@ -119,27 +118,6 @@ func IsChanged(origin, target interface{}, excludes ...string) bool {
 	return false
 }
 
-func EncodeId(id int64) (r string) {
-	r = base64.StdEncoding.EncodeToString([]byte(strconv.FormatInt(id+33554432, 32)))
-	return
-}
-
-func DecodeId(id string) (r int64, err error) {
-	bs, err := base64.StdEncoding.DecodeString(id)
-	if err != nil {
-		err = fmt.Errorf("%s base64Decode, %s", id, err)
-		return
-	}
-	r, err = strconv.ParseInt(string(bs), 32, 64)
-	if err != nil {
-		err = fmt.Errorf("%s parse, %s", id, err)
-		return
-	}
-	// 32 to 10, - 32768
-	r -= 33554432
-	return
-}
-
 func DateRange(s, e string) (r []string) {
 	st, _ := time.Parse("20060102", s)
 	et, _ := strconv.Atoi(e)
@@ -195,19 +173,4 @@ func Goid() int {
 		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
 	}
 	return id
-}
-
-func GobSerialize(inp interface{}) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	enc := gob.NewEncoder(buf)
-	err := enc.Encode(inp)
-	if err == nil {
-		return buf.Bytes(), nil
-	}
-	return nil, err
-}
-
-func GobDeserialize(d []byte, inp interface{}) error {
-	dec := gob.NewDecoder(bytes.NewBuffer(d))
-	return dec.Decode(inp)
 }
