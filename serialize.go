@@ -55,11 +55,11 @@ func GobDeserialize(d []byte, inp interface{}) error {
 	return dec.Decode(inp)
 }
 
-func PbSerialize(inp interface{}) ([]byte, error) {
+func PbSerialize(inp proto.Message) ([]byte, error) {
 	return proto.Marshal(inp)
 }
 
-func PbDeserialize(b []byte, inp interface{}) error {
+func PbDeserialize(b []byte, inp proto.Message) error {
 	return proto.Unmarshal(b, inp)
 }
 
