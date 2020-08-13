@@ -12,6 +12,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"math/rand"
+	"net"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -173,4 +174,24 @@ func Goid() int {
 		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
 	}
 	return id
+}
+
+/**
+ * 获取本机IP地址
+ */
+func GetLocalIP() (r string, err error) {
+	var addrs []net.Addr
+	if addrs, err = net.InterfaceAddrs(); err != nil {
+		return
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				r = ipnet.IP.String()
+				break
+			}
+		}
+	}
+	return
 }
