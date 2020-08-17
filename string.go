@@ -96,7 +96,7 @@ func GzipString(inp string) (r []byte, err error) {
 	var buf bytes.Buffer
 	w := gzip.NewWriter(&buf)
 	defer w.Close()
-	if _, err = w.Write(inp); err == nil {
+	if _, err = w.Write([]byte(inp)); err == nil {
 		err = w.Flush()
 	}
 	if err != nil {
