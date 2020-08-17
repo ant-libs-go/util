@@ -8,6 +8,8 @@
 package util
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
@@ -85,9 +87,23 @@ func Md5String(inp string) string {
 }
 
 func Sha1String(inp string) string {
-	sha1Ctx := sha1.New()
-	sha1Ctx.Write([]byte(inp))
-	return hex.EncodeToString(sha1Ctx.Sum(nil))
+	h := sha1.New()
+	h.Write([]byte(inp))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func GzipString(inp string) (r []byte, err error) {
+	var buf bytes.Buffer
+	w := gzip.NewWriter(&buf)
+	defer w.Close()
+	if _, err = w.Write(inp); err == nil {
+		err = w.Flush()
+	}
+	if err != nil {
+		return
+	}
+	r = buf.Bytes()
+	return
 }
 
 func StrToInt64(inp string, defaultValue int64) int64 {
