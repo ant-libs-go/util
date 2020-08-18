@@ -20,3 +20,20 @@ func JoinMap(arr map[string]string, glue string, glue2 string) (r string) {
 	r = strings.Join(t, glue2)
 	return
 }
+
+func MapToQueryStr(inp map[string]string) (r string) {
+	for k, v := range inp {
+		inp[k] = UrlEncode(v)
+	}
+	r = JoinMap(inp, "=", "&")
+	return
+}
+
+func QueryStrToMap(inp string) (r map[string]string) {
+	r = map[string]string{}
+	for _, v := range strings.Split(inp, "&") {
+		p := strings.Split(v, "=")
+		r[p[0]] = UrlDecode(p[1])
+	}
+	return
+}
