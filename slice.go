@@ -95,3 +95,17 @@ func SliceColumn(slice interface{}, col string) (r interface{}) {
 	}
 	return
 }
+
+func SliceTrim(slice interface{}, cutset ...interface{}) (r []interface{}) {
+	if reflect.TypeOf(slice).Kind() != reflect.Slice {
+		return
+	}
+	s := reflect.ValueOf(slice)
+	for i := 0; i < s.Len(); i++ {
+		if exists, _ := InSlice(s.Index(i).Interface(), cutset); exists {
+			continue
+		}
+		r = append(r, s.Index(i).Interface())
+	}
+	return
+}
