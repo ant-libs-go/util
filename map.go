@@ -33,6 +33,9 @@ func QueryStrToMap(inp string) (r map[string]string) {
 	r = map[string]string{}
 	for _, v := range strings.Split(inp, "&") {
 		p := strings.Split(v, "=")
+		if len(p) != 2 {
+			continue
+		}
 		r[p[0]] = UrlDecode(p[1])
 	}
 	return
