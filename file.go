@@ -127,13 +127,12 @@ func WriteFile(data string, file string) error {
 }
 
 func GetCurPath() (r string, err error) {
-	var path string
-	if path, err = exec.LookPath(os.Args[0]); err != nil {
+	if r, err = exec.LookPath(os.Args[0]); err != nil {
 		return
 	}
-	if path, err = filepath.Abs(path); err != nil {
+	if r, err = filepath.Abs(r); err != nil {
 		return
 	}
-	path = filepath.Dir(path)
+	r = filepath.Dir(r)
 	return
 }
