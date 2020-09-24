@@ -16,6 +16,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -123,4 +124,16 @@ func ReadFile(file string) (string, error) {
 
 func WriteFile(data string, file string) error {
 	return ioutil.WriteFile(file, []byte(data), 0666)
+}
+
+func GetCurPath() (r string, err error) {
+	var path string
+	if path, err = exec.LookPath(os.Args[0]); err != nil {
+		return
+	}
+	if path, err = filepath.Abs(path); err != nil {
+		return
+	}
+	path = filepath.Dir(path)
+	return
 }
