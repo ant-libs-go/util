@@ -195,3 +195,10 @@ func GetLocalIP() (r string, err error) {
 	}
 	return
 }
+
+func If(condition bool, trueVal, falseVal interface{}) interface{} {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
