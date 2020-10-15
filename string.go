@@ -14,6 +14,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -166,4 +167,11 @@ func MinInt(x, y int) int {
 	}
 
 	return y
+}
+
+func Tprintf(format string, params map[string]string) string {
+	for k, v := range params {
+		format = strings.Replace(format, "%("+k+")s", fmt.Sprintf("%s", v), -1)
+	}
+	return format
 }
