@@ -40,3 +40,10 @@ func QueryStrToMap(inp string) (r map[string]string) {
 	}
 	return
 }
+
+func MapKeys(inp map[string]interface{}) (r []string) {
+	for k, _ := range inp {
+		r = append(r, k)
+	}
+	return
+}
