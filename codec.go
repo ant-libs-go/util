@@ -17,6 +17,7 @@ import (
 
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/gogo/protobuf/proto"
+	"github.com/vmihailenco/msgpack"
 )
 
 func IntEncode(inp int64) (r string) {
@@ -40,30 +41,37 @@ func IntDecode(inp string) (r int64, err error) {
 	return
 }
 
-func GobSerialize(inp interface{}) ([]byte, error) {
-	buf := new(bytes.Buffer)
-	enc := gob.NewEncoder(buf)
-	err := enc.Encode(inp)
-	if err == nil {
-		return buf.Bytes(), nil
-	}
-	return nil, err
+func GobEncode(inp interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(inp)
+	return buf.Bytes(), err
 }
 
-func GobDeserialize(d []byte, inp interface{}) error {
-	dec := gob.NewDecoder(bytes.NewBuffer(d))
-	return dec.Decode(inp)
+func GobDecode(d []byte, inp interface{}) error {
+	err := gob.NewDecoder(bytes.NewBuffer(d)).Decode(inp)
+	return err
 }
 
-func PbSerialize(inp proto.Message) ([]byte, error) {
+func PbEncode(inp proto.Message) ([]byte, error) {
 	return proto.Marshal(inp)
 }
 
-func PbDeserialize(b []byte, inp proto.Message) error {
+func PbDecode(b []byte, inp proto.Message) error {
 	return proto.Unmarshal(b, inp)
 }
 
-func ThriftSerialize(inp interface{}) ([]byte, error) {
+func MsgpackEncode(inp interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	err := msgpack.NewEncoder(&buf).Encode(inp)
+	return buf.Bytes(), err
+}
+
+func MsgpackDecode(b []byte, inp interface{}) error {
+	err := msgpack.NewDecoder(bytes.NewReader(b)).Decode(inp)
+	return err
+}
+
+func ThriftEncode(inp interface{}) ([]byte, error) {
 	b := thrift.NewTMemoryBufferLen(1024)
 	p := thrift.NewTBinaryProtocolFactoryDefault().GetProtocol(b)
 	t := &thrift.TSerializer{
