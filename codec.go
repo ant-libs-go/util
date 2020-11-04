@@ -12,6 +12,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -39,6 +40,15 @@ func IntDecode(inp string) (r int64, err error) {
 	// 32 to 10, - 32768
 	r -= 33554432
 	return
+}
+
+func JsonEncode(inp interface{}) ([]byte, error) {
+	return json.Marshal(inp)
+}
+
+func JsonDecode(d []byte, inp interface{}) error {
+	err := json.Unmarshal(d, inp)
+	return err
 }
 
 func GobEncode(inp interface{}) ([]byte, error) {
