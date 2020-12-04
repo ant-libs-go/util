@@ -135,6 +135,18 @@ func IntToStr(inp int) string {
 	return Int64ToStr(int64(inp))
 }
 
+func StrToFloat64(inp string, defaultValue float64) float64 {
+	val, err := strconv.ParseFloat(inp, 64)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+func Float64ToStr(inp float64) string {
+	return strconv.FormatFloat(inp, 'E', -1, 64)
+}
+
 func UrlEncode(inp string) string {
 	return url.QueryEscape(inp)
 }
