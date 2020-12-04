@@ -51,6 +51,13 @@ func JsonDecode(d []byte, inp interface{}) error {
 	return err
 }
 
+// TODO
+func GobSerialize(inp interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(inp)
+	return buf.Bytes(), err
+}
+
 func GobEncode(inp interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(inp)
