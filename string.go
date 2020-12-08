@@ -159,28 +159,6 @@ func UrlDecode(inp string) string {
 	return r
 }
 
-func Max(x, y int64) int64 {
-	if x > y {
-		return x
-	}
-	return y
-}
-
-func Min(x, y int64) int64 {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-func MinInt(x, y int) int {
-	if x < y {
-		return x
-	}
-
-	return y
-}
-
 func Tprintf(format string, params map[string]string) string {
 	for k, v := range params {
 		format = strings.Replace(format, "%("+k+")s", fmt.Sprintf("%s", v), -1)
