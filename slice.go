@@ -109,3 +109,10 @@ func SliceTrim(slice interface{}, cutset ...interface{}) (r []interface{}) {
 	}
 	return
 }
+
+func SliceSum(slice []int) (r int) {
+	for _, v := range slice {
+		r += v
+	}
+	return
+}
