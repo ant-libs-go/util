@@ -202,3 +202,9 @@ func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	}
 	return falseVal
 }
+
+func IfDo(condition bool, fn func()) {
+	if condition {
+		fn()
+	}
+}
