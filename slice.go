@@ -11,8 +11,8 @@ import (
 	"reflect"
 )
 
-func InSlice(val interface{}, slice interface{}) (exists bool, index int) {
-	exists = false
+func InSlice(val interface{}, slice interface{}) (exist bool, index int) {
+	exist = false
 	index = -1
 
 	if reflect.TypeOf(slice).Kind() != reflect.Slice {
@@ -24,7 +24,7 @@ func InSlice(val interface{}, slice interface{}) (exists bool, index int) {
 			continue
 		}
 		index = i
-		exists = true
+		exist = true
 		return
 	}
 	return
@@ -36,14 +36,14 @@ func SliceDiff(slice1, slice2 interface{}) (r []interface{}) {
 	}
 	s := reflect.ValueOf(slice1)
 	for i := 0; i < s.Len(); i++ {
-		if exists, _ := InSlice(s.Index(i).Interface(), slice2); exists {
+		if exist, _ := InSlice(s.Index(i).Interface(), slice2); exist {
 			continue
 		}
 		r = append(r, s.Index(i).Interface())
 	}
 	s = reflect.ValueOf(slice2)
 	for i := 0; i < s.Len(); i++ {
-		if exists, _ := InSlice(s.Index(i).Interface(), slice1); exists {
+		if exist, _ := InSlice(s.Index(i).Interface(), slice1); exist {
 			continue
 		}
 		r = append(r, s.Index(i).Interface())
@@ -57,7 +57,7 @@ func SliceUnique(slice interface{}) (r []interface{}) {
 	}
 	s := reflect.ValueOf(slice)
 	for i := 0; i < s.Len(); i++ {
-		if exists, _ := InSlice(s.Index(i).Interface(), r); exists {
+		if exist, _ := InSlice(s.Index(i).Interface(), r); exist {
 			continue
 		}
 		r = append(r, s.Index(i).Interface())
@@ -86,11 +86,36 @@ func SliceColumn(slice interface{}, col string) (r interface{}) {
 				r = []int64{}
 			}
 			r = append(r.([]int64), f.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+			if r == nil {
+				r = []uint32{}
+			}
+			r = append(r.([]uint32), uint32(f.Uint()))
+		case reflect.Uint64:
+			if r == nil {
+				r = []uint64{}
+			}
+			r = append(r.([]uint64), f.Uint())
 		case reflect.String:
 			if r == nil {
 				r = []string{}
 			}
 			r = append(r.([]string), f.String())
+		case reflect.Bool:
+			if r == nil {
+				r = []bool{}
+			}
+			r = append(r.([]bool), f.Bool())
+		case reflect.Float32:
+			if r == nil {
+				r = []float32{}
+			}
+			r = append(r.([]float32), float32(f.Float()))
+		case reflect.Float64:
+			if r == nil {
+				r = []float64{}
+			}
+			r = append(r.([]float64), f.Float())
 		}
 	}
 	return
@@ -102,7 +127,7 @@ func SliceTrim(slice interface{}, cutset ...interface{}) (r []interface{}) {
 	}
 	s := reflect.ValueOf(slice)
 	for i := 0; i < s.Len(); i++ {
-		if exists, _ := InSlice(s.Index(i).Interface(), cutset); exists {
+		if exist, _ := InSlice(s.Index(i).Interface(), cutset); exist {
 			continue
 		}
 		r = append(r, s.Index(i).Interface())

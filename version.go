@@ -35,26 +35,26 @@ func VersionIntToString(inp int32) string {
 	return strings.Join(s, ".")
 }
 
-func CompareVersion(vI, vJ string) int {
-	vINums := strings.Split(vI, ".")
-	vJNums := strings.Split(vJ, ".")
+func CompareVersion(v1, v2 string) int {
+	v1Nums := strings.Split(v1, ".")
+	v2Nums := strings.Split(v2, ".")
 
-	versionNumLen := len(vINums)
-	if len(vJNums) > len(vINums) {
-		versionNumLen = len(vJNums)
+	versionNumLen := len(v1Nums)
+	if len(v2Nums) > len(v1Nums) {
+		versionNumLen = len(v2Nums)
 	}
 
-	for len(vINums) < versionNumLen {
-		vINums = append(vINums, "0")
+	for len(v1Nums) < versionNumLen {
+		v1Nums = append(v1Nums, "0")
 	}
 
-	for len(vJNums) < versionNumLen {
-		vJNums = append(vJNums, "0")
+	for len(v2Nums) < versionNumLen {
+		v2Nums = append(v2Nums, "0")
 	}
 
 	for i := 0; i < versionNumLen; i++ {
-		vINum := StrToInt(vINums[i], 0)
-		vJNum := StrToInt(vJNums[i], 0)
+		vINum := StrToInt(v1Nums[i], 0)
+		vJNum := StrToInt(v2Nums[i], 0)
 
 		if vINum > vJNum {
 			return 1

@@ -27,44 +27,57 @@ import (
  * @params: excludes ... the attribute name exclude assign
  */
 func Assign(origin, target interface{}, excludes ...string) (err error) {
-	var curFieldName string
+	var cursor string
 	defer func() {
+		if err != nil {
+			return
+		}
 		if e := recover(); e != nil {
-			err = fmt.Errorf("assign %s: %s", curFieldName, e)
+			err = fmt.Errorf("assign %s fail, %s", cursor, e)
 		}
 	}()
 
 	val_origin := reflect.ValueOf(origin).Elem()
 	val_target := reflect.ValueOf(target).Elem()
+	fmt.Println(val_origin)
+	fmt.Println(val_target)
 
 	for i := 0; i < val_origin.NumField(); i++ {
-		curFieldName = val_origin.Type().Field(i).Name
-		is_exclude := false
-		for _, col := range excludes {
-			if curFieldName == col {
-				is_exclude = true
-				break
-			}
-		}
-		if is_exclude {
+		cursor = val_origin.Type().Field(i).Name
+		if exist, _ := InSlice(val_origin.Type().Field(i).Name, excludes); exist {
 			continue
 		}
-		is_valid := val_target.FieldByName(curFieldName).IsValid()
+
+		is_valid := val_target.FieldByName(cursor).IsValid()
 		switch val_origin.Field(i).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			if !is_valid {
-				continue
+			if is_valid {
+				val_target.FieldByName(cursor).SetInt(val_origin.Field(i).Int())
 			}
-			val_target.FieldByName(curFieldName).SetInt(val_origin.Field(i).Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			if is_valid {
+				val_target.FieldByName(cursor).SetUint(val_origin.Field(i).Uint())
+			}
 		case reflect.String:
-			if !is_valid {
-				continue
+			if is_valid {
+				val_target.FieldByName(cursor).SetString(val_origin.Field(i).String())
 			}
-			val_target.FieldByName(curFieldName).SetString(val_origin.Field(i).String())
+		case reflect.Bool:
+			if is_valid {
+				val_target.FieldByName(cursor).SetBool(val_origin.Field(i).Bool())
+			}
+		case reflect.Float32, reflect.Float64:
+			if is_valid {
+				val_target.FieldByName(cursor).SetFloat(val_origin.Field(i).Float())
+			}
+		case reflect.Map, reflect.Array, reflect.Slice: // ptr type not deep copy
+			if is_valid {
+				val_target.FieldByName(cursor).Set(reflect.ValueOf(val_origin.Field(i).Interface()))
+			}
 		case reflect.Struct:
-			Assign(val_origin.Field(i).Addr().Interface(), target, excludes...)
+			err = Assign(val_origin.Field(i).Addr().Interface(), val_target.FieldByName(cursor).Addr().Interface(), excludes...)
 		case reflect.Ptr:
-			Assign(val_origin.Field(i).Interface(), target, excludes...)
+			err = Assign(val_origin.Field(i).Interface(), val_target.FieldByName(cursor).Interface(), excludes...)
 		}
 	}
 	return
@@ -76,7 +89,7 @@ func Assign(origin, target interface{}, excludes ...string) (err error) {
  * @param: target
  * @params: excludes ... the attribute name exclude check
  */
-func IsChanged(origin, target interface{}, excludes ...string) bool {
+func StructIsEqual(origin, target interface{}, excludes ...string) bool {
 	val_origin := reflect.ValueOf(origin).Elem()
 	val_target := reflect.ValueOf(target).Elem()
 
@@ -84,39 +97,46 @@ func IsChanged(origin, target interface{}, excludes ...string) bool {
 		if !val_target.FieldByName(val_origin.Type().Field(i).Name).IsValid() {
 			continue
 		}
-		is_exclude := false
-		for _, col := range excludes {
-			if val_origin.Type().Field(i).Name == col {
-				is_exclude = true
-				break
-			}
-		}
-		if is_exclude {
+		if exist, _ := InSlice(val_origin.Type().Field(i).Name, excludes); exist {
 			continue
 		}
+
 		switch val_origin.Field(i).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			if val_target.Field(i).Int() != val_origin.Field(i).Int() {
-				return true
+				return false
+			}
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			if val_target.Field(i).Uint() != val_origin.Field(i).Uint() {
+				return false
 			}
 		case reflect.String:
 			if val_target.Field(i).String() != val_origin.Field(i).String() {
-				return true
+				return false
 			}
-		case reflect.Slice:
-			if !(reflect.ValueOf(val_origin.Field(i).Interface()).Len() == 0 && reflect.ValueOf(val_origin.Field(i).Interface()).Len() == 0) {
-				if !reflect.DeepEqual(val_target.Field(i).Interface(), val_origin.Field(i).Interface()) {
-					return true
+		case reflect.Bool:
+			if val_target.Field(i).Bool() != val_origin.Field(i).Bool() {
+				return false
+			}
+		case reflect.Float32, reflect.Float64:
+			if FloatIsEqual(val_target.Field(i).Float(), val_origin.Field(i).Float()) == false {
+				return false
+			}
+		case reflect.Map, reflect.Array, reflect.Slice, reflect.Struct, reflect.Ptr:
+			if reflect.DeepEqual(val_target.Field(i).Interface(), val_origin.Field(i).Interface()) == false {
+				return false
+			}
+			/*
+				old code, only slice
+				if !(reflect.ValueOf(val_origin.Field(i).Interface()).Len() == 0 && reflect.ValueOf(val_origin.Field(i).Interface()).Len() == 0) {
+					if reflect.DeepEqual(val_target.Field(i).Interface(), val_origin.Field(i).Interface()) == false {
+						return false
+					}
 				}
-			}
-		case reflect.Map:
-			if !reflect.DeepEqual(val_target.Field(i).Interface(), val_origin.Field(i).Interface()) {
-				return true
-			}
-
+			*/
 		}
 	}
-	return false
+	return true
 }
 
 func DateRange(s, e string) (r []string) {
@@ -162,7 +182,7 @@ func GetRandomString(length int) string {
 func Goid() int {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("panic recover:panic info:%v", err)
+			fmt.Printf("panic recover, %s\n", err)
 		}
 	}()
 
