@@ -21,12 +21,14 @@ import (
 	"github.com/vmihailenco/msgpack"
 )
 
-func IntEncode(inp int64) (r string) {
+func IntEncode(inp int64, salt int64) (r string) {
+	IfDo(salt == 0, func() { salt = 33554432 })
 	r = base64.StdEncoding.EncodeToString([]byte(strconv.FormatInt(inp+33554432, 32)))
 	return
 }
 
-func IntDecode(inp string) (r int64, err error) {
+func IntDecode(inp string, salt int64) (r int64, err error) {
+	IfDo(salt == 0, func() { salt = 33554432 })
 	bs, err := base64.StdEncoding.DecodeString(inp)
 	if err != nil {
 		err = fmt.Errorf("%s base64Decode, %s", inp, err)
@@ -38,7 +40,7 @@ func IntDecode(inp string) (r int64, err error) {
 		return
 	}
 	// 32 to 10, - 32768
-	r -= 33554432
+	r -= salt
 	return
 }
 
@@ -49,13 +51,6 @@ func JsonEncode(inp interface{}) ([]byte, error) {
 func JsonDecode(d []byte, inp interface{}) error {
 	err := json.Unmarshal(d, inp)
 	return err
-}
-
-// TODO
-func GobSerialize(inp interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	err := gob.NewEncoder(&buf).Encode(inp)
-	return buf.Bytes(), err
 }
 
 func GobEncode(inp interface{}) ([]byte, error) {

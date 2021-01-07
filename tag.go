@@ -7,11 +7,6 @@
 
 package util
 
-import (
-	"reflect"
-	"strings"
-)
-
 // TODO
 /*
 type S sturct {
@@ -20,6 +15,8 @@ type S sturct {
 }
 */
 
+// unfinished
+/*
 type FieldTag struct {
 	Name    string
 	Range   string
@@ -54,3 +51,4 @@ func ParseTags(obj interface{}, tagname string) (r map[string]*FieldTag) {
 	}
 	return
 }
+*/
