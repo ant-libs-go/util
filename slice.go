@@ -8,7 +8,9 @@
 package util
 
 import (
+	"math/rand"
 	"reflect"
+	"time"
 )
 
 func InSlice(val interface{}, slice interface{}) (exist bool, index int) {
@@ -140,4 +142,14 @@ func SliceSumInt(slice []int) (r int) {
 		r += v
 	}
 	return
+}
+
+func SliceShuffle(slice []int32) []int32 {
+	rand.Seed(time.Now().UnixNano())
+	length := len(slice)
+	for i := 0; i < length; i++ {
+		index := rand.Intn(length - i)
+		slice[i], slice[index+i] = slice[index+i], slice[i]
+	}
+	return slice
 }
