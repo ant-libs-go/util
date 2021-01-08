@@ -39,8 +39,6 @@ func Assign(origin, target interface{}, excludes ...string) (err error) {
 
 	val_origin := reflect.ValueOf(origin).Elem()
 	val_target := reflect.ValueOf(target).Elem()
-	fmt.Println(val_origin)
-	fmt.Println(val_target)
 
 	for i := 0; i < val_origin.NumField(); i++ {
 		cursor = val_origin.Type().Field(i).Name
