@@ -104,3 +104,36 @@ func ThriftDecode(b []byte, inp interface{}) error {
 	d.Transport.Close()
 	return d.Read(inp.(thrift.TStruct), b)
 }
+
+/* serialize value */
+type SerializeValue struct {
+	Point []string
+	Range []*struct {
+		S int
+		E int
+	}
+	Dict map[string]string
+}
+
+func (this *SerializeValue) Map() (r map[string]string) {
+	if len(this.Dict) != 0 {
+		return this.Dict
+	}
+	return
+}
+
+func (this *SerializeValue) Slice() (r []string) {
+	if len(this.Point) != 0 {
+		r = this.Point
+		return
+	}
+	for _, v := range this.Range {
+		if v.S > v.E {
+			continue
+		}
+		for ; v.S <= v.E; v.S++ {
+			r = append(r, strconv.Itoa(v.S))
+		}
+	}
+	return
+}
