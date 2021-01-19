@@ -105,7 +105,7 @@ func ThriftDecode(b []byte, inp interface{}) error {
 	return d.Read(inp.(thrift.TStruct), b)
 }
 
-/* range value */
+/* serialize value */
 type SerializeValue struct {
 	Point []string
 	Range []*struct {
