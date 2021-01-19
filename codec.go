@@ -115,6 +115,11 @@ type SerializeValue struct {
 	Dict map[string]string
 }
 
+func NewSerializeValue(inp []byte) (r *SerializeValue, err error) {
+	err = json.Unmarshal(inp, &r)
+	return
+}
+
 func (this *SerializeValue) Map() (r map[string]string) {
 	if len(this.Dict) != 0 {
 		return this.Dict
