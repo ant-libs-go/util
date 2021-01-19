@@ -121,13 +121,16 @@ func NewSerializeValue(inp []byte) (r *SerializeValue, err error) {
 }
 
 func (this *SerializeValue) Map() (r map[string]string) {
-	if len(this.Dict) != 0 {
-		return this.Dict
+	if this == nil {
+		return
 	}
-	return
+	return this.Dict
 }
 
 func (this *SerializeValue) Slice() (r []string) {
+	if this == nil {
+		return
+	}
 	if len(this.Point) != 0 {
 		r = this.Point
 		return
