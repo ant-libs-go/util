@@ -46,7 +46,7 @@ func StrToFloat64(inp string, defaultValue float64) float64 {
 }
 
 func Float64ToStr(inp float64) string {
-	return strconv.FormatFloat(inp, 'E', -1, 64)
+	return strconv.FormatFloat(inp, 'f', -1, 64)
 }
 
 func StrToFloat32(inp string, defaultValue float32) float32 {
@@ -58,5 +58,5 @@ func StrToFloat32(inp string, defaultValue float32) float32 {
 }
 
 func Float32ToStr(inp float32) string {
-	return strconv.FormatFloat(float64(inp), 'E', -1, 64)
+	return strconv.FormatFloat(float64(inp), 'f', -1, 64)
 }
