@@ -24,7 +24,7 @@
 package logs
 
 import (
-	"fmt"
+	"bytes"
 	"strconv"
 	"sync"
 	"time"
@@ -40,6 +40,7 @@ var (
 
 type SessLog struct {
 	sessid string
+	prefix string
 	last   int64
 	logger seelog.LoggerInterface
 }
@@ -63,7 +64,7 @@ func New(sessid string) (r *SessLog) {
 }
 
 func build(sessid string) *SessLog {
-	o := &SessLog{sessid: sessid, logger: seelog.Current}
+	o := &SessLog{sessid: sessid, prefix: "[sid:" + sessid + "]", logger: seelog.Current}
 	lock.Lock()
 	entries[sessid] = o
 	lock.Unlock()
@@ -103,26 +104,34 @@ func (this *SessLog) use() *SessLog {
 	return this
 }
 
+func (this *SessLog) buildFormat(f string) string {
+	var buffer bytes.Buffer
+	buffer.WriteString(this.prefix)
+	buffer.WriteString(" ")
+	buffer.WriteString(f)
+	return buffer.String()
+}
+
 func (this *SessLog) Tracef(f string, v ...interface{}) {
-	this.use().logger.Tracef(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Tracef(this.buildFormat(f), v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
-	this.use().logger.Debugf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Debugf(this.buildFormat(f), v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
-	this.use().logger.Infof(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Infof(this.buildFormat(f), v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
-	this.use().logger.Warnf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Warnf(this.buildFormat(f), v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
-	this.use().logger.Errorf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Errorf(this.buildFormat(f), v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
-	this.use().logger.Criticalf(fmt.Sprintf("[sid:%s] %s", this.sessid, f), v...)
+	this.use().logger.Criticalf(this.buildFormat(f), v...)
 }

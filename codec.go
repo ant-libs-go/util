@@ -23,7 +23,7 @@ import (
 
 func IntEncode(inp int64, salt int64) (r string) {
 	IfDo(salt == 0, func() { salt = 33554432 })
-	r = base64.StdEncoding.EncodeToString([]byte(strconv.FormatInt(inp+33554432, 32)))
+	r = base64.StdEncoding.EncodeToString([]byte(strconv.FormatInt(inp+salt, 32)))
 	return
 }
 
