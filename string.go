@@ -124,3 +124,32 @@ func Tprintf(format string, params map[string]string) string {
 	}
 	return format
 }
+
+func BytesReplace(s, old, new []byte, n int) []byte {
+	if n == 0 {
+		return s
+	}
+
+	if len(old) < len(new) {
+		return bytes.Replace(s, old, new, n)
+	}
+
+	if n < 0 {
+		n = len(s)
+	}
+
+	var wid, i, j, w int
+	for i, j = 0, 0; i < len(s) && j < n; j++ {
+		wid = bytes.Index(s[i:], old)
+		if wid < 0 {
+			break
+		}
+
+		w += copy(s[w:], s[i:i+wid])
+		w += copy(s[w:], new)
+		i += wid + len(old)
+	}
+
+	w += copy(s[w:], s[i:])
+	return s[0:w]
+}
