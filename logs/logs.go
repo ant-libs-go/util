@@ -24,7 +24,6 @@
 package logs
 
 import (
-	"bytes"
 	"strconv"
 	"sync"
 	"time"
@@ -104,34 +103,26 @@ func (this *SessLog) use() *SessLog {
 	return this
 }
 
-func (this *SessLog) buildFormat(f string) string {
-	var buffer bytes.Buffer
-	buffer.WriteString(this.prefix)
-	buffer.WriteString(" ")
-	buffer.WriteString(f)
-	return buffer.String()
-}
-
 func (this *SessLog) Tracef(f string, v ...interface{}) {
-	this.use().logger.Tracef(this.buildFormat(f), v...)
+	this.use().logger.Tracef(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
-	this.use().logger.Debugf(this.buildFormat(f), v...)
+	this.use().logger.Debugf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
-	this.use().logger.Infof(this.buildFormat(f), v...)
+	this.use().logger.Infof(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
-	this.use().logger.Warnf(this.buildFormat(f), v...)
+	this.use().logger.Warnf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
-	this.use().logger.Errorf(this.buildFormat(f), v...)
+	this.use().logger.Errorf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
-	this.use().logger.Criticalf(this.buildFormat(f), v...)
+	this.use().logger.Criticalf(this.prefix+" "+f, v...)
 }
