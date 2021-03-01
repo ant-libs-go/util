@@ -226,3 +226,19 @@ func IfDo(condition bool, fn func()) {
 		fn()
 	}
 }
+
+// 获取指定日期周一零点时间
+func FirstTimeOfWeek(t time.Time) (r time.Time) {
+	offset := int(time.Monday - t.Weekday())
+	if offset > 0 {
+		offset = -6
+	}
+	r = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset)
+	return
+}
+
+// 获取指定日期零点时间
+func FirstTimeOfDay(t time.Time) (r time.Time) {
+	r = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+	return
+}
