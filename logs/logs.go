@@ -40,6 +40,7 @@ var (
 type SessLog struct {
 	sessid string
 	prefix string
+	dummy  bool
 	last   int64
 	logger seelog.LoggerInterface
 }
@@ -65,9 +66,13 @@ func New(sessid string) (r *SessLog) {
 func build(sessid string) *SessLog {
 	o := &SessLog{sessid: sessid, prefix: "[sid:" + sessid + "]", logger: seelog.Current}
 	lock.Lock()
-	entries[sessid] = o
+	entries[sessid] = o.use()
 	lock.Unlock()
 	return o.use()
+}
+
+func (this *SessLog) Dummy() {
+	this.dummy = true
 }
 
 func (this *SessLog) Release() {
@@ -104,25 +109,43 @@ func (this *SessLog) use() *SessLog {
 }
 
 func (this *SessLog) Tracef(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Tracef(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Debugf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Infof(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Warnf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Errorf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
+	if this.dummy {
+		return
+	}
 	this.use().logger.Criticalf(this.prefix+" "+f, v...)
 }
