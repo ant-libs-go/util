@@ -37,12 +37,23 @@ var (
 	entries map[string]*SessLog
 )
 
+type BehaviorLevel int32
+
+const (
+	BlTrace BehaviorLevel = iota
+	BlDebug
+	BlInfo
+	BlWarn
+	BlError
+	BlCritical
+)
+
 type SessLog struct {
-	sessid string
-	prefix string
-	dummy  bool
-	last   int64
-	logger seelog.LoggerInterface
+	sessid        string
+	prefix        string
+	behaviorLevel BehaviorLevel
+	last          int64
+	logger        seelog.LoggerInterface
 }
 
 func init() {
@@ -71,8 +82,8 @@ func build(sessid string) *SessLog {
 	return o.use()
 }
 
-func (this *SessLog) Dummy() {
-	this.dummy = true
+func (this *SessLog) SetBehaviorLevel(bl BehaviorLevel) {
+	this.behaviorLevel = bl
 }
 
 func (this *SessLog) Release() {
@@ -109,42 +120,42 @@ func (this *SessLog) use() *SessLog {
 }
 
 func (this *SessLog) Tracef(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlTrace {
 		return
 	}
 	this.use().logger.Tracef(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlDebug {
 		return
 	}
 	this.use().logger.Debugf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlInfo {
 		return
 	}
 	this.use().logger.Infof(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlWarn {
 		return
 	}
 	this.use().logger.Warnf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlError {
 		return
 	}
 	this.use().logger.Errorf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
-	if this.dummy {
+	if this.behaviorLevel <= BlCritical {
 		return
 	}
 	this.use().logger.Criticalf(this.prefix+" "+f, v...)
