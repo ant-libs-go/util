@@ -40,7 +40,7 @@ var (
 type SessLog struct {
 	sessid        string
 	prefix        string
-	behaviorLevel seelog.LogLevel
+	behaviorLevel int
 	last          int64
 	logger        seelog.LoggerInterface
 }
@@ -71,7 +71,7 @@ func build(sessid string) *SessLog {
 	return o.use()
 }
 
-func (this *SessLog) SetBehaviorLevel(bl seelog.LogLevel) {
+func (this *SessLog) SetBehaviorLevel(bl int) {
 	this.behaviorLevel = bl
 }
 
