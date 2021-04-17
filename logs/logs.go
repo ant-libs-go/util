@@ -40,7 +40,7 @@ var (
 type SessLog struct {
 	sessid        string
 	prefix        string
-	behaviorLevel int
+	behaviorLevel seelog.LogLevel
 	last          int64
 	logger        seelog.LoggerInterface
 }
@@ -71,7 +71,7 @@ func build(sessid string) *SessLog {
 	return o.use()
 }
 
-func (this *SessLog) SetBehaviorLevel(bl int) {
+func (this *SessLog) SetBehaviorLevel(bl seelog.LogLevel) {
 	this.behaviorLevel = bl
 }
 
@@ -109,42 +109,42 @@ func (this *SessLog) use() *SessLog {
 }
 
 func (this *SessLog) Tracef(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.TraceLvl {
+	if this.behaviorLevel > seelog.TraceLvl {
 		return
 	}
 	this.use().logger.Tracef(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Debugf(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.DebugLvl {
+	if this.behaviorLevel > seelog.DebugLvl {
 		return
 	}
 	this.use().logger.Debugf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Infof(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.InfoLvl {
+	if this.behaviorLevel > seelog.InfoLvl {
 		return
 	}
 	this.use().logger.Infof(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Warnf(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.WarnLvl {
+	if this.behaviorLevel > seelog.WarnLvl {
 		return
 	}
 	this.use().logger.Warnf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Errorf(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.ErrorLvl {
+	if this.behaviorLevel > seelog.ErrorLvl {
 		return
 	}
 	this.use().logger.Errorf(this.prefix+" "+f, v...)
 }
 
 func (this *SessLog) Criticalf(f string, v ...interface{}) {
-	if this.behaviorLevel <= seelog.CriticalLvl {
+	if this.behaviorLevel > seelog.CriticalLvl {
 		return
 	}
 	this.use().logger.Criticalf(this.prefix+" "+f, v...)
