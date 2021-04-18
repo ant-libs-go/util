@@ -75,6 +75,10 @@ func (this *SessLog) SetDummyLevel(lv seelog.LogLevel) {
 	this.dummyLevel = lv
 }
 
+func (this *SessLog) GetDummyLevel() (r seelog.LogLevel) {
+	return this.dummyLevel
+}
+
 func (this *SessLog) Release() {
 	lock.Lock()
 	this.release()
