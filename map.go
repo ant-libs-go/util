@@ -21,10 +21,11 @@ func JoinMap(arr map[string]string, glue string, glue2 string) (r string) {
 }
 
 func MapToQueryStr(inp map[string]string) (r string) {
+	t := make(map[string]string, len(inp))
 	for k, v := range inp {
-		inp[k] = UrlEncode(v)
+		t[k] = UrlEncode(v)
 	}
-	r = JoinMap(inp, "=", "&")
+	r = JoinMap(t, "=", "&")
 	return
 }
 
