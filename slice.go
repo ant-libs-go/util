@@ -17,7 +17,7 @@ func InSlice(val interface{}, slice interface{}) (exist bool, index int) {
 	exist = false
 	index = -1
 
-	if reflect.TypeOf(slice).Kind() != reflect.Slice {
+	if slice == nil || reflect.TypeOf(slice).Kind() != reflect.Slice {
 		return
 	}
 	s := reflect.ValueOf(slice)
@@ -53,16 +53,61 @@ func SliceDiff(slice1, slice2 interface{}) (r []interface{}) {
 	return
 }
 
-func SliceUnique(slice interface{}) (r []interface{}) {
+func SliceUnique(slice interface{}) (r interface{}) {
 	if reflect.TypeOf(slice).Kind() != reflect.Slice {
 		return
 	}
 	s := reflect.ValueOf(slice)
 	for i := 0; i < s.Len(); i++ {
-		if exist, _ := InSlice(s.Index(i).Interface(), r); exist {
+		f := s.Index(i)
+		if f.IsValid() == false {
 			continue
 		}
-		r = append(r, s.Index(i).Interface())
+		if exist, _ := InSlice(f.Interface(), r); exist {
+			continue
+		}
+		switch f.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+			if r == nil {
+				r = []int32{}
+			}
+			r = append(r.([]int32), int32(f.Int()))
+		case reflect.Int64:
+			if r == nil {
+				r = []int64{}
+			}
+			r = append(r.([]int64), f.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+			if r == nil {
+				r = []uint32{}
+			}
+			r = append(r.([]uint32), uint32(f.Uint()))
+		case reflect.Uint64:
+			if r == nil {
+				r = []uint64{}
+			}
+			r = append(r.([]uint64), f.Uint())
+		case reflect.String:
+			if r == nil {
+				r = []string{}
+			}
+			r = append(r.([]string), f.String())
+		case reflect.Bool:
+			if r == nil {
+				r = []bool{}
+			}
+			r = append(r.([]bool), f.Bool())
+		case reflect.Float32:
+			if r == nil {
+				r = []float32{}
+			}
+			r = append(r.([]float32), float32(f.Float()))
+		case reflect.Float64:
+			if r == nil {
+				r = []float64{}
+			}
+			r = append(r.([]float64), f.Float())
+		}
 	}
 	return
 }
@@ -74,7 +119,7 @@ func SliceColumn(slice interface{}, col string) (r interface{}) {
 	s := reflect.ValueOf(slice)
 	for i := 0; i < s.Len(); i++ {
 		f := s.Index(i).Elem().FieldByName(col)
-		if f.IsValid() != true {
+		if f.IsValid() == false {
 			continue
 		}
 		switch f.Kind() {
