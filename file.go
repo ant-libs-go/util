@@ -126,6 +126,24 @@ func WriteFile(data string, file string) error {
 	return ioutil.WriteFile(file, []byte(data), 0666)
 }
 
+func ReadLine(file string, fn func(line []byte)) (err error) {
+	var f *os.File
+	if f, err = os.Open(file); err != nil {
+		return
+	}
+	defer f.Close()
+
+	buf := bufio.NewReader(f)
+	for {
+		line, _, err := buf.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		fn(line)
+	}
+	return
+}
+
 func GetCurPath() (r string, err error) {
 	if r, err = exec.LookPath(os.Args[0]); err != nil {
 		return
