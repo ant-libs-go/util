@@ -60,3 +60,16 @@ func StrToFloat32(inp string, defaultValue float32) float32 {
 func Float32ToStr(inp float32) string {
 	return strconv.FormatFloat(float64(inp), 'f', -1, 64)
 }
+
+func Int64ToBase32(id int64) (r string) {
+	r = strconv.FormatInt(id, 32)
+	return
+}
+
+func Base32ToInt64(id string) (r int64) {
+	r, err := strconv.ParseInt(id, 32, 64)
+	if err != nil {
+		r = 0
+	}
+	return
+}
