@@ -96,13 +96,13 @@ func registerReleaser() {
 			ts := time.Now().Unix()
 			lock.Lock()
 			for _, entry := range entries {
-				if ts-entry.last < 120 { // timeout for 2 minute
+				if ts-entry.last < 10 { // timeout for 10 second
 					continue
 				}
 				entry.release()
 			}
 			lock.Unlock()
-			time.Sleep(10 * time.Second) // interval 10 second
+			time.Sleep(5 * time.Second) // interval 5 second
 		}
 	}()
 }
