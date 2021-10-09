@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"git.apache.org/thrift.git/lib/go/thrift"
+	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/golang/protobuf/proto"
 	"github.com/vmihailenco/msgpack"
 )
@@ -102,7 +102,7 @@ func ThriftDecode(b []byte, inp interface{}) error {
 		Protocol:  p,
 	}
 	d.Transport.Close()
-	return d.Read(inp.(thrift.TStruct), b)
+	return d.Read(context.Background(), inp.(thrift.TStruct), b)
 }
 
 /* serialize value */
