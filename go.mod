@@ -3,7 +3,7 @@ module github.com/ant-libs-go/util
 go 1.13
 
 require (
-	github.com/apache/thrift/lib/go/thrift v0.0.0-20210120171102-e27e82c46ba4
+	github.com/apache/thrift v0.14.0
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
 	github.com/golang/protobuf v1.4.3
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
