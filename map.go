@@ -8,6 +8,7 @@
 package util
 
 import (
+	"reflect"
 	"strings"
 )
 
@@ -44,6 +45,62 @@ func QueryStrToMap(inp string) (r map[string]string) {
 func MapKeys(inp map[string]interface{}) (r []string) {
 	for k, _ := range inp {
 		r = append(r, k)
+	}
+	return
+}
+
+func MapColumn(ms interface{}, col string) (r interface{}) {
+	if reflect.TypeOf(ms).Kind() != reflect.Map {
+		return
+	}
+	s := reflect.ValueOf(ms)
+	for _, i := range s.MapKeys() {
+		f := s.MapIndex(i).Elem().FieldByName(col)
+		if f.IsValid() == false {
+			continue
+		}
+		switch f.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+			if r == nil {
+				r = []int32{}
+			}
+			r = append(r.([]int32), int32(f.Int()))
+		case reflect.Int64:
+			if r == nil {
+				r = []int64{}
+			}
+			r = append(r.([]int64), f.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+			if r == nil {
+				r = []uint32{}
+			}
+			r = append(r.([]uint32), uint32(f.Uint()))
+		case reflect.Uint64:
+			if r == nil {
+				r = []uint64{}
+			}
+			r = append(r.([]uint64), f.Uint())
+		case reflect.String:
+			if r == nil {
+				r = []string{}
+			}
+			r = append(r.([]string), f.String())
+		case reflect.Bool:
+			if r == nil {
+				r = []bool{}
+			}
+			r = append(r.([]bool), f.Bool())
+		case reflect.Float32:
+			if r == nil {
+				r = []float32{}
+			}
+			r = append(r.([]float32), float32(f.Float()))
+		case reflect.Float64:
+			if r == nil {
+				r = []float64{}
+			}
+			r = append(r.([]float64), f.Float())
+		}
 	}
 	return
 }
