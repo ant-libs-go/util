@@ -63,6 +63,20 @@ func SnakeString(inp string) string {
 	return strings.ToLower(string(data[:]))
 }
 
+func LeftUpper(s string) string {
+	if len(s) > 0 {
+		return strings.ToUpper(string(s[0])) + s[1:]
+	}
+	return s
+}
+
+func LeftLower(s string) string {
+	if len(s) > 0 {
+		return strings.ToLower(string(s[0])) + s[1:]
+	}
+	return s
+}
+
 // regexp.Compile(`\[(?P<node>[\d_]+)\]$`)
 // return {"node":val}
 func FindStringSubmatch(re *regexp.Regexp, inp string) (r map[string]string, err error) {
