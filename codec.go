@@ -17,7 +17,7 @@ import (
 	"strconv"
 
 	"github.com/apache/thrift/lib/go/thrift"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 	"github.com/vmihailenco/msgpack"
 )
 
